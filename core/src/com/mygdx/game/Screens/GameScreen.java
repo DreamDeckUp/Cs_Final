@@ -6,13 +6,16 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.ParallaxBackground;
@@ -31,6 +34,14 @@ public class GameScreen implements Screen {
         game = aGame;
         stage = new Stage(new ScreenViewport());
         camera = (OrthographicCamera)stage.getViewport().getCamera();
+        Texture grassTexture = new Texture(Gdx.files.internal("grass.png"));
+        grassTexture.setWrap(Texture.TextureWrap.MirroredRepeat, Texture.TextureWrap.MirroredRepeat);
+        TextureRegion textureRegion = new TextureRegion(grassTexture);
+        textureRegion.setRegion(10,0,grassTexture.getWidth()*8,grassTexture.getHeight());
+
+        Image ground = new Image(textureRegion);
+
+        ground.setScaleY(1.5f);
 
         Array<Texture> textures = new Array<Texture>();
         for(int i = 2; i <=6;i++){
@@ -43,7 +54,7 @@ public class GameScreen implements Screen {
         parallaxBackground.setSpeed(1);
 
         stage.addActor(parallaxBackground);
-
+        stage.addActor(ground);
         Label title = new Label("Playing Screen", MyGdxGame.gameSkin);
         title.setAlignment(Align.center);
         title.setY(Gdx.graphics.getHeight()*2/3);
@@ -51,7 +62,7 @@ public class GameScreen implements Screen {
         stage.addActor(title);
 
         TextButton backButton = new TextButton("Back",MyGdxGame.gameSkin);
-        backButton.setWidth(Gdx.graphics.getWidth()/2);
+        backButton.setWidth(Gdx.graphics.getWidth()/5);
         backButton.setPosition(Gdx.graphics.getWidth()-(backButton.getWidth()+10),Gdx.graphics.getHeight()-(backButton.getHeight()+10));
         backButton.addListener(new InputListener(){
             @Override

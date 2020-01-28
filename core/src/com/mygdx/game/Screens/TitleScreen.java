@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MyGdxGame;
 
@@ -66,7 +67,8 @@ public class TitleScreen implements Screen {
     public void addBackground(){
         Texture texture = new Texture(Gdx.files.internal("background.jpg"));
         Image background = new Image(texture);
-        background.setSize(Gdx.graphics.getWidth(),Gdx.graphics.getWidth());
+        background.setScaling(Scaling.fill);
+        //background.setSize(Gdx.graphics.getWidth(),Gdx.graphics.getWidth());
         background.setPosition(0,Gdx.graphics.getHeight()-background.getHeight());
         stage.addActor(background);
     }
