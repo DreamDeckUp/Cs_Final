@@ -65,7 +65,7 @@ public class TitleScreen implements Screen {
     }
 
     public void addBackground(){
-        Texture texture = new Texture(Gdx.files.internal("background.jpg"));
+        Texture texture = new Texture(Gdx.files.internal("imgs/background.jpg"));
         Image background = new Image(texture);
         background.setScaling(Scaling.fill);
         //background.setSize(Gdx.graphics.getWidth(),Gdx.graphics.getWidth());

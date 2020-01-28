@@ -34,7 +34,7 @@ public class GameScreen implements Screen {
         game = aGame;
         stage = new Stage(new ScreenViewport());
         camera = (OrthographicCamera)stage.getViewport().getCamera();
-        Texture grassTexture = new Texture(Gdx.files.internal("grass.png"));
+        Texture grassTexture = new Texture(Gdx.files.internal(".imgs/grass.png"));
         grassTexture.setWrap(Texture.TextureWrap.MirroredRepeat, Texture.TextureWrap.MirroredRepeat);
         TextureRegion textureRegion = new TextureRegion(grassTexture);
         textureRegion.setRegion(10,0,grassTexture.getWidth()*8,grassTexture.getHeight());
