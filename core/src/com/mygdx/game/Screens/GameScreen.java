@@ -34,14 +34,7 @@ public class GameScreen implements Screen {
         game = aGame;
         stage = new Stage(new ScreenViewport());
         camera = (OrthographicCamera)stage.getViewport().getCamera();
-        Texture grassTexture = new Texture(Gdx.files.internal(".imgs/grass.png"));
-        grassTexture.setWrap(Texture.TextureWrap.MirroredRepeat, Texture.TextureWrap.MirroredRepeat);
-        TextureRegion textureRegion = new TextureRegion(grassTexture);
-        textureRegion.setRegion(10,0,grassTexture.getWidth()*8,grassTexture.getHeight());
 
-        Image ground = new Image(textureRegion);
-
-        ground.setScaleY(1.5f);
 
         Array<Texture> textures = new Array<Texture>();
         for(int i = 2; i <=6;i++){
@@ -49,21 +42,71 @@ public class GameScreen implements Screen {
             textures.get(textures.size-1).setWrap(Texture.TextureWrap.MirroredRepeat, Texture.TextureWrap.MirroredRepeat);
         }
 
-        ParallaxBackground parallaxBackground = new ParallaxBackground(textures);
+
+
+        final ParallaxBackground parallaxBackground = new ParallaxBackground(textures);
         parallaxBackground.setSize(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         parallaxBackground.setSpeed(1);
 
         stage.addActor(parallaxBackground);
-        stage.addActor(ground);
+
         Label title = new Label("Playing Screen", MyGdxGame.gameSkin);
         title.setAlignment(Align.center);
         title.setY(Gdx.graphics.getHeight()*2/3);
         title.setWidth(Gdx.graphics.getWidth());
         stage.addActor(title);
 
+        TextButton speedButton = new TextButton("+Speed", MyGdxGame.gameSkin);
+        speedButton.setWidth(Gdx.graphics.getWidth()/5);
+        speedButton.setPosition(0, Gdx.graphics.getHeight()-speedButton.getHeight()-10);
+        speedButton.addListener(new InputListener(){
+            @Override
+            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+                parallaxBackground.setSpeed(parallaxBackground.getSpeed()+1);
+            }
+            @Override
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+        stage.addActor(speedButton);
+
+        TextButton nospeedButton = new TextButton("-Speed", MyGdxGame.gameSkin);
+        nospeedButton.setWidth(Gdx.graphics.getWidth()/5);
+        nospeedButton.setPosition(0, Gdx.graphics.getHeight()-(2*nospeedButton.getHeight())-10);
+        nospeedButton.addListener(new InputListener(){
+            @Override
+            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+                parallaxBackground.setSpeed(parallaxBackground.getSpeed()-1);
+            }
+            @Override
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+        stage.addActor(nospeedButton);
+
+
+        TextButton pauseButton = new TextButton("Stop",MyGdxGame.gameSkin);
+        pauseButton.setWidth(Gdx.graphics.getWidth()/5);
+        pauseButton.setPosition(Gdx.graphics.getWidth()-(pauseButton.getWidth()+10),Gdx.graphics.getHeight()-(2*pauseButton.getHeight()-20));
+        pauseButton.addListener(new InputListener(){
+            @Override
+            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+                parallaxBackground.setSpeed(0);
+
+            }
+            @Override
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+
+        stage.addActor(pauseButton);
+
         TextButton backButton = new TextButton("Back",MyGdxGame.gameSkin);
         backButton.setWidth(Gdx.graphics.getWidth()/5);
-        backButton.setPosition(Gdx.graphics.getWidth()-(backButton.getWidth()+10),Gdx.graphics.getHeight()-(backButton.getHeight()+10));
+        backButton.setPosition(Gdx.graphics.getWidth()-(backButton.getWidth()+10),Gdx.graphics.getHeight()-(backButton.getHeight()-20));
         backButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {

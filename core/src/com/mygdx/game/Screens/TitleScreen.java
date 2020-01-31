@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.mygdx.game.MyGdxGame;
 
 public class TitleScreen implements Screen {
@@ -26,16 +27,16 @@ public class TitleScreen implements Screen {
         stage = new Stage(new ScreenViewport());
         addBackground();
 
-        Label title = new Label("Title Screen", MyGdxGame.gameSkin);
+        Label title = new Label("Good gam", MyGdxGame.gameSkin);
         title.setAlignment(Align.center);
         title.setY(Gdx.graphics.getHeight()*2/3);
         title.setWidth(Gdx.graphics.getWidth());
         stage.addActor(title);
 
-        TextButton playButton = new TextButton("Play!",MyGdxGame.gameSkin);
-        playButton.setWidth(Gdx.graphics.getWidth()/2);
-        playButton.setPosition(Gdx.graphics.getWidth()/2-playButton.getWidth()/2,Gdx.graphics.getHeight()/2-playButton.getHeight()/2);
-        playButton.addListener(new InputListener(){
+        TextButton upgradeButton = new TextButton("Upgrades",MyGdxGame.gameSkin);
+        upgradeButton.setWidth(Gdx.graphics.getWidth()/2);
+        upgradeButton.setPosition(Gdx.graphics.getWidth()/2-upgradeButton.getWidth()/2,Gdx.graphics.getHeight()/2-upgradeButton.getHeight()/2);
+        upgradeButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
                 game.setScreen(new UpgradeScreen(game));
@@ -45,7 +46,7 @@ public class TitleScreen implements Screen {
                 return true;
             }
         });
-        stage.addActor(playButton);
+        stage.addActor(upgradeButton);
 
         TextButton optionsButton = new TextButton("Options",MyGdxGame.gameSkin);
         optionsButton.setWidth(Gdx.graphics.getWidth()/2);
@@ -62,14 +63,28 @@ public class TitleScreen implements Screen {
         });
         stage.addActor(optionsButton);
 
+        TextButton playButton = new TextButton("Play",MyGdxGame.gameSkin);
+        playButton.setWidth(Gdx.graphics.getWidth()/2);
+        playButton.setPosition(Gdx.graphics.getWidth()/2-playButton.getWidth()/2,Gdx.graphics.getHeight()-playButton.getHeight()-10);
+        playButton.addListener(new InputListener(){
+            @Override
+            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+                game.setScreen(new GameScreen(game));
+            }
+            @Override
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+        stage.addActor(playButton);
     }
 
     public void addBackground(){
         Texture texture = new Texture(Gdx.files.internal("imgs/background.jpg"));
         Image background = new Image(texture);
         background.setScaling(Scaling.fill);
-        //background.setSize(Gdx.graphics.getWidth(),Gdx.graphics.getWidth());
-        background.setPosition(0,Gdx.graphics.getHeight()-background.getHeight());
+        background.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        background.setPosition(0, 0);
         stage.addActor(background);
     }
 
