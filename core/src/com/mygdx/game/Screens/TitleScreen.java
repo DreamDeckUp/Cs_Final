@@ -35,7 +35,7 @@ public class TitleScreen implements Screen {
 
         TextButton upgradeButton = new TextButton("Upgrades",MyGdxGame.gameSkin);
         upgradeButton.setWidth(Gdx.graphics.getWidth()/2);
-        upgradeButton.setPosition(Gdx.graphics.getWidth()/2-upgradeButton.getWidth()/2,Gdx.graphics.getHeight()/2-upgradeButton.getHeight()/2);
+        upgradeButton.setPosition(Gdx.graphics.getWidth()/2-upgradeButton.getWidth()/2,Gdx.graphics.getHeight()/3-upgradeButton.getHeight()/2);
         upgradeButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
@@ -50,7 +50,7 @@ public class TitleScreen implements Screen {
 
         TextButton optionsButton = new TextButton("Options",MyGdxGame.gameSkin);
         optionsButton.setWidth(Gdx.graphics.getWidth()/2);
-        optionsButton.setPosition(Gdx.graphics.getWidth()/2-optionsButton.getWidth()/2,Gdx.graphics.getHeight()/4-optionsButton.getHeight()/2);
+        optionsButton.setPosition(Gdx.graphics.getWidth()/2-optionsButton.getWidth()/2,upgradeButton.getY()-optionsButton.getHeight()/2-20);
         optionsButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
@@ -65,7 +65,7 @@ public class TitleScreen implements Screen {
 
         TextButton playButton = new TextButton("Play",MyGdxGame.gameSkin);
         playButton.setWidth(Gdx.graphics.getWidth()/2);
-        playButton.setPosition(Gdx.graphics.getWidth()/2-playButton.getWidth()/2,Gdx.graphics.getHeight()-playButton.getHeight()-10);
+        playButton.setPosition(Gdx.graphics.getWidth()/2-playButton.getWidth()/2,upgradeButton.getY()+upgradeButton.getHeight()+20);
         playButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {

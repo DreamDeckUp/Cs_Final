@@ -32,6 +32,9 @@ public class UpgradeScreen implements Screen {
     private Stage stage;
     private Game game;
     static Array<Upgrade> upgrades;
+    Container upgradeGroup;
+    static int count= 0;
+    int i;
     public UpgradeScreen(Game aGame) {
         game=aGame;
         stage = new Stage(new ScreenViewport());
@@ -98,21 +101,30 @@ public class UpgradeScreen implements Screen {
         scrollPane.setScale(1.25f);
         scrollPane.setHeight(Gdx.graphics.getHeight()*3/7);
         scrollPane.setWidth(scrollPane.getPrefWidth());
-
-
         stage.addActor(scrollPane);
-        final VerticalGroup upgradeGroup = new VerticalGroup();
-        upgradeGroup.setPosition(Gdx.graphics.getWidth()/2,100);
 
-        final Upgrade rocketBoost = new Upgrade(new Texture(Gdx.files.internal("imgs/rocket.png")),20,(int)gameWidth*5/6,(int)gameHeight/2);
+        upgradeGroup = new Container();
 
-        scrollPane.getChildren().items[0].addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                System.out.println("yeh");
-            }
-        });
+        upgrades = new Array();
+        Upgrade rocketBoost = new Upgrade(new Texture(Gdx.files.internal("imgs/rocket.png")),20,(int)gameWidth/2+200,(int)(scrollPane.getY()+scrollPane.getHeight()/2));
+        upgrades.add(rocketBoost);
+        Upgrade fuelTank = new Upgrade(new Texture(Gdx.files.internal("imgs/tank.jpg")),25,(int)gameWidth/2+200,(int)(scrollPane.getY()+scrollPane.getHeight()/2));
+        upgrades.add(fuelTank);
+
+        for(i = 0;i<upgrades.size;i++){
+            strings[i].addListener(new ClickListener(){
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    upgradeGroup.setActor(UpgradeScreen.upgrades.get(UpgradeScreen.count));
+                    stage.addActor(upgrades.get(UpgradeScreen.count).getUpgradeButton());
+
+                }
+            });
+            count++;
+        }
+
         Gdx.input.setInputProcessor(stage);
+        stage.addActor(upgradeGroup);
 
     }
     @Override

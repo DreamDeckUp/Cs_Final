@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
@@ -18,21 +19,22 @@ public class Upgrade extends Actor {
     int lvl;
     int pixelPerProgress;
     int x,y;
-    Table table;
+
+
     public Upgrade(Texture art, final int maxLvl,int x,int y){
         this.art=art;
         this.maxLvl=maxLvl;
         this.x=x;
         this.y=y;
-
+        setOrigin(x,y);
         backProgressBar = new Texture(Gdx.files.internal("imgs/backProgress.png"));
         frontProgressBar = new Texture(Gdx.files.internal("imgs/frontProgress.png"));
         lvl=0;
         pixelPerProgress = frontProgressBar.getWidth()/maxLvl;
 
         upgradeButton = new TextButton("Upgrade", MyGdxGame.gameSkin);
-        upgradeButton.setSize(100,35);
-        upgradeButton.setPosition(100,100);
+        upgradeButton.setSize(frontProgressBar.getWidth(),100);
+        upgradeButton.setPosition(getOriginX()-upgradeButton.getWidth()/2,getOriginY()-frontProgressBar.getHeight()-upgradeButton.getHeight()-15);
         upgradeButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
@@ -62,9 +64,9 @@ public class Upgrade extends Actor {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
-        batch.draw(art, this.x,this.y+10+art.getHeight());
-        batch.draw(backProgressBar,this.x,this.y+10,pixelPerProgress*lvl,backProgressBar.getHeight());
-        batch.draw(frontProgressBar,this.x,this.y+10,pixelPerProgress*maxLvl,backProgressBar.getHeight());
+        batch.draw(art, getOriginX()-150, getOriginY()+10,getOriginX(),getOriginY(),300,200,1f,1f,0,0,0,art.getWidth(),art.getHeight(),false,false);
+        batch.draw(backProgressBar,getOriginX()-backProgressBar.getWidth()/2, getOriginY()-backProgressBar.getHeight(),pixelPerProgress*lvl,backProgressBar.getHeight());
+        batch.draw(frontProgressBar,getOriginX()-frontProgressBar.getWidth()/2,getOriginY()-frontProgressBar.getHeight(),pixelPerProgress*maxLvl,backProgressBar.getHeight());
     }
 
     public Texture getArt() {
