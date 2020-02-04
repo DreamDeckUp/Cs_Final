@@ -4,28 +4,34 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.mygdx.game.MyGdxGame;
-
+import com.mygdx.game.Upgrade;
 
 
 public class UpgradeScreen implements Screen {
     private Stage stage;
     private Game game;
+    static Array<Upgrade> upgrades;
     public UpgradeScreen(Game aGame) {
         game=aGame;
         stage = new Stage(new ScreenViewport());
@@ -34,14 +40,14 @@ public class UpgradeScreen implements Screen {
 
         final Label title = new Label("Upgrades", MyGdxGame.gameSkin);
         title.setFontScale(2f);
-        title.setY(Gdx.graphics.getHeight()*5/6);
+        title.setY(Gdx.graphics.getHeight()*7/8);
         title.setAlignment(Align.center);
         title.setWidth(Gdx.graphics.getWidth());
         stage.addActor(title);
 
         TextButton backButton = new TextButton("Back", MyGdxGame.gameSkin);
         backButton.setWidth(stage.getWidth()/10);
-        backButton.setPosition(0, 0);
+        backButton.setPosition(Gdx.graphics.getWidth()/20, 20);
         backButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
@@ -53,6 +59,21 @@ public class UpgradeScreen implements Screen {
             }
         });
         stage.addActor(backButton);
+
+        TextButton playButton = new TextButton("play", MyGdxGame.gameSkin);
+        playButton.setWidth(stage.getWidth()/10);
+        playButton.setPosition(Gdx.graphics.getWidth()-Gdx.graphics.getWidth()/20-playButton.getWidth(), 20);
+        playButton.addListener(new InputListener(){
+            @Override
+            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+                game.setScreen(new GameScreen(game));
+            }
+            @Override
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+        stage.addActor(playButton);
 
         float gameWidth = Gdx.graphics.getWidth();
         float gameHeight = Gdx.graphics.getHeight();
@@ -69,13 +90,21 @@ public class UpgradeScreen implements Screen {
         }
         list.setItems(strings);
         ScrollPane scrollPane = new ScrollPane(list);
-        scrollPane.setBounds(900, 0, gameWidth, gameHeight);
+        scrollPane.setBounds(200, 0, gameWidth, gameHeight);
         scrollPane.setSmoothScrolling(false);
-        scrollPane.setPosition(gameWidth / 2 - scrollPane.getWidth() / 4,
-                gameHeight / 2 - scrollPane.getHeight() / 4);
+        scrollPane.setPosition(gameWidth / 20 ,
+                gameHeight * 1/5);
         scrollPane.setTransform(true);
-        scrollPane.setScale(0.5f);
+        scrollPane.setScale(1.25f);
+        scrollPane.setHeight(Gdx.graphics.getHeight()*3/7);
+        scrollPane.setWidth(scrollPane.getPrefWidth());
+
+
         stage.addActor(scrollPane);
+        final VerticalGroup upgradeGroup = new VerticalGroup();
+        upgradeGroup.setPosition(Gdx.graphics.getWidth()/2,100);
+
+        final Upgrade rocketBoost = new Upgrade(new Texture(Gdx.files.internal("imgs/rocket.png")),20,(int)gameWidth*5/6,(int)gameHeight/2);
 
         scrollPane.getChildren().items[0].addListener(new ClickListener(){
             @Override

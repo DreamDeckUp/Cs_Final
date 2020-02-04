@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
 public class Upgrade extends Actor {
@@ -16,23 +16,33 @@ public class Upgrade extends Actor {
     static TextButton upgradeButton;
     int maxLvl;
     int lvl;
-    int pixelPerprogress;
-    public Upgrade(Texture art,int maxLvl){
+    int pixelPerProgress;
+    int x,y;
+    Table table;
+    public Upgrade(Texture art, final int maxLvl,int x,int y){
         this.art=art;
         this.maxLvl=maxLvl;
+        this.x=x;
+        this.y=y;
 
         backProgressBar = new Texture(Gdx.files.internal("imgs/backProgress.png"));
         frontProgressBar = new Texture(Gdx.files.internal("imgs/frontProgress.png"));
         lvl=0;
-        pixelPerprogress = frontProgressBar.getWidth()/maxLvl;
+        pixelPerProgress = frontProgressBar.getWidth()/maxLvl;
 
         upgradeButton = new TextButton("Upgrade", MyGdxGame.gameSkin);
-        upgradeButton.setSize(getWidth()*2/3,getHeight()/5);
-        upgradeButton.setPosition(getWidth()/2-upgradeButton.getWidth()/2,upgradeButton.getHeight()/2);
+        upgradeButton.setSize(100,35);
+        upgradeButton.setPosition(100,100);
         upgradeButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
-                lvl++;
+                if(lvl==maxLvl){
+                    return;
+                }
+                else{
+                    lvl++;
+                }
+                Gdx.app.log("lvl",""+lvl);
 
             }
             @Override
@@ -52,9 +62,9 @@ public class Upgrade extends Actor {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
-
-        batch.draw(backProgressBar,20,30,pixelPerprogress*lvl,backProgressBar.getHeight());
-        batch.draw(frontProgressBar,20,30,pixelPerprogress*lvl,backProgressBar.getHeight());
+        batch.draw(art, this.x,this.y+10+art.getHeight());
+        batch.draw(backProgressBar,this.x,this.y+10,pixelPerProgress*lvl,backProgressBar.getHeight());
+        batch.draw(frontProgressBar,this.x,this.y+10,pixelPerProgress*maxLvl,backProgressBar.getHeight());
     }
 
     public Texture getArt() {
@@ -106,10 +116,10 @@ public class Upgrade extends Actor {
     }
 
     public int getPixelPerprogress() {
-        return pixelPerprogress;
+        return pixelPerProgress;
     }
 
-    public void setPixelPerprogress(int pixelPerprogress) {
-        this.pixelPerprogress = pixelPerprogress;
+    public void setPixelPerprogress(int pixelPerProgress) {
+        this.pixelPerProgress = pixelPerProgress;
     }
 }

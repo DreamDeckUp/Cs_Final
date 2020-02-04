@@ -19,7 +19,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.ParallaxBackground;
-import com.sun.org.apache.xpath.internal.operations.Or;
+
 
 /**
  * Created by julienvillegas on 17/01/2017.
