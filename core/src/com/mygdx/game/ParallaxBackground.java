@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.Screens.GameScreen;
 
 import java.awt.Color;
 
@@ -63,8 +64,6 @@ public class ParallaxBackground extends Actor {
             batch.draw(layers.get(i), x, y, originX, originY, width, heigth,scaleX,scaleY,rotation,srcX,srcY,layers.get(i).getWidth(),layers.get(i).getHeight(),flipX,flipY);
         }
         int sourceX = scroll + 4*this.LAYER_SPEED_DIFFERENCE *scroll;
-
-        batch.draw(grassTexture,x, y, originX, originY, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()/6, scaleX, scaleY, rotation, sourceX, srcY, grassTexture.getWidth(), grassTexture.getHeight(), flipX, flipY);
     }
 }
 
