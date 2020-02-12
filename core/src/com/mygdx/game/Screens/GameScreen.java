@@ -42,6 +42,10 @@ public class GameScreen implements Screen, InputProcessor {
     public static Body groundBody;
     Box2DDebugRenderer debugRenderer;
     Matrix4 debugMatrix;
+    Texture pipe;
+    Sprite pipeSprite;
+    Body pipeBody;
+    int[] ranNumbers= new int[Gdx.graphics.getWidth()];
 
     private float elapsed = 0;
     float torque = 0.0f;
@@ -56,6 +60,12 @@ public class GameScreen implements Screen, InputProcessor {
         stage = new Stage(new ScreenViewport());
         camera = (OrthographicCamera)stage.getViewport().getCamera();
 
+        for(int i =0;i<ranNumbers.length;i++){
+            ranNumbers[i] = (int)(Math.random()*Gdx.graphics.getHeight()*1/5);
+            System.out.println(ranNumbers[i]);
+        }
+
+
             //PHYSICS
         batch = new SpriteBatch();
         img = new Texture("pixthulhu/raw/touchpad-knob.png");
@@ -63,7 +73,7 @@ public class GameScreen implements Screen, InputProcessor {
 
         sprite.setPosition(Gdx.graphics.getWidth()/2-sprite.getWidth()/2, Gdx.graphics.getHeight()/2-sprite.getHeight()/2);
 
-        world = new World(new Vector2(0, -200f), true);
+        world = new World(new Vector2(0, -500f), true);
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -105,8 +115,18 @@ public class GameScreen implements Screen, InputProcessor {
 
         groundBody.createFixture(groundFixtureDef);
 
+        pipe = new Texture(Gdx.files.internal("imgs/pipe.png"));
+        pipe.setWrap(Texture.TextureWrap.MirroredRepeat, Texture.TextureWrap.MirroredRepeat);
+        TextureRegion pipes = new TextureRegion(pipe);
+        pipes.setRegion(0, 0, pipe.getWidth(), pipe.getHeight()*2);
+        pipeSprite = new Sprite(pipes);
+        BodyDef pipeDef = new BodyDef();
+        pipeDef.type = BodyDef.BodyType.StaticBody;
 
-            //ADDING INPUTS
+
+
+
+        //ADDING INPUTS
         Gdx.input.setInputProcessor(this);
         System.out.println(body.getMass());
         debugRenderer = new Box2DDebugRenderer();
@@ -183,14 +203,22 @@ public class GameScreen implements Screen, InputProcessor {
         groundBody.setGravityScale(0);
 
         batch.begin();
+        int pipeX = (int)groundBody.getPosition().x;
         if (drawSprite) {
             batch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(), sprite.getOriginY(), sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(), sprite.getScaleY(), sprite.getRotation());
+            for(int i = 0;i<Gdx.graphics.getWidth(); i++){
+                float randomHeight = ranNumbers[i];
+
+                batch.draw(pipeSprite, pipeX, randomHeight-20, pipeSprite.getOriginX(), pipeSprite.getOriginY(), pipeSprite.getWidth()*2/3, pipeSprite.getHeight(), pipeSprite.getScaleX(), pipeSprite.getScaleY(), pipeSprite.getRotation());
+                pipeX+=250;
+            }
             batch.draw(groundSprite, groundSprite.getX(), groundSprite.getY(), groundSprite.getOriginX(), groundSprite.getOriginY(), groundSprite.getWidth(), groundSprite.getHeight(), groundSprite.getScaleX(), groundSprite.getScaleY(), groundSprite.getRotation());
 
         }
         batch.end();
 
         debugRenderer.render(world, debugMatrix);
+        //camera.translate();
     }
 
     @Override
@@ -230,7 +258,7 @@ public class GameScreen implements Screen, InputProcessor {
             body.applyForceToCenter(-20000f, 0f,true);
 
         if(keycode == Input.Keys.UP)
-            body.applyForceToCenter(0f,20000f,true);
+            body.applyForceToCenter(0f,20000000f,true);
         if(keycode == Input.Keys.DOWN)
             body.applyForceToCenter(0f, -20000f, true);
 
@@ -256,6 +284,9 @@ public class GameScreen implements Screen, InputProcessor {
         // The ESC key toggles the visibility of the sprite allow user to see physics debug info
         if(keycode == Input.Keys.ESCAPE)
             drawSprite = !drawSprite;
+        if(keycode == Input.Keys.K){
+            body.setLinearVelocity(new Vector2(3000000,3000000));
+        }
 
         return true;
     }
@@ -268,9 +299,9 @@ public class GameScreen implements Screen, InputProcessor {
     // This could result in the object "spinning"
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        //body.applyForce(1f,1f,screenX,screenY,true);
+        body.applyForceToCenter(0f,20000000f,true);
         //body.applyTorque(0.4f,true);
-        game.setScreen(new TitleScreen(game));
+        //game.setScreen(new TitleScreen(game));
         return true;
 
     }
