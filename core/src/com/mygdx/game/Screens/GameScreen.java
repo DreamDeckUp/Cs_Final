@@ -36,8 +36,8 @@ import com.mygdx.game.ParallaxBackground;
 import com.mygdx.game.Pipe;
 
 public class GameScreen implements Screen, InputProcessor {
-    SpriteBatch batch, groundBatch;
-    Sprite sprite, groundSprite;
+    SpriteBatch batch;
+    Sprite sprite, topPipeSprite, groundSprite;
     Texture img, groundImg;
     World world;
     Body body;
@@ -48,11 +48,9 @@ public class GameScreen implements Screen, InputProcessor {
     Sprite pipeSprite;
     int[] ranNumbers= new int[Gdx.graphics.getWidth()];
 
-    private float elapsed = 0;
     float torque = 0.0f;
     boolean drawSprite = true;
     boolean drawDebug = true;
-    Pipe pipeBody;
 
     private Stage stage;
     private Game game;
@@ -63,13 +61,7 @@ public class GameScreen implements Screen, InputProcessor {
         stage = new Stage(new ScreenViewport());
         camera = (OrthographicCamera)stage.getViewport().getCamera();
 
-        for(int i =0;i<ranNumbers.length;i++) {
-            ranNumbers[i] = (int) (Math.random() * Gdx.graphics.getHeight() * 1 / 7);
-            System.out.println(ranNumbers[i]);
-        }
-
-
-            //PHYSICS
+        //PHYSICS
         batch = new SpriteBatch();
         img = new Texture("pixthulhu/raw/touchpad-knob.png");
         sprite = new Sprite(img);
@@ -83,14 +75,13 @@ public class GameScreen implements Screen, InputProcessor {
         bodyDef.position.set(sprite.getX()+sprite.getWidth()/2, sprite.getY()+sprite.getHeight()/2);
 
         body = world.createBody(bodyDef);
-            //GROUND BODY
+        //GROUND BODY
         groundImg = new Texture("imgs/grass.png");
         groundImg.setWrap(Texture.TextureWrap.MirroredRepeat, Texture.TextureWrap.MirroredRepeat);
         TextureRegion textureRegion = new TextureRegion(groundImg);
         textureRegion.setRegion(10,0,groundImg.getWidth()*100000,groundImg.getHeight());
         groundSprite = new Sprite(textureRegion);
         groundSprite.setSize(groundSprite.getWidth(),groundSprite.getHeight()*2);
-
 
         groundSprite.setPosition(0, 30);
 
@@ -121,15 +112,6 @@ public class GameScreen implements Screen, InputProcessor {
         groundBody.createFixture(groundFixtureDef);
 
         pipe = new Texture(Gdx.files.internal("imgs/pipe.png"));
-        pipeSprite = new Sprite(pipe);
-
-
-
-
-
-
-
-
 
         //ADDING INPUTS
         Gdx.input.setInputProcessor(this);
@@ -137,7 +119,7 @@ public class GameScreen implements Screen, InputProcessor {
         debugRenderer = new Box2DDebugRenderer();
         //REST IS IN RENDER
 
-            //ADDING PARALLAX BACKGROUND
+        //ADDING PARALLAX BACKGROUND
         Array<Texture> textures = new Array<Texture>();
         for(int i = 2; i <=6;i++){
             textures.add(new Texture(Gdx.files.internal("parallax/img"+i+".png")));
@@ -150,14 +132,14 @@ public class GameScreen implements Screen, InputProcessor {
 
         stage.addActor(parallaxBackground);
 
-            //ADDING TITLE
-        /*Label title = new Label("Playing Screen", MyGdxGame.gameSkin);
+        //ADDING TITLE
+        Label title = new Label("Playing Screen", MyGdxGame.gameSkin);
         title.setAlignment(Align.center);
         title.setY(Gdx.graphics.getHeight()*2/3);
         title.setWidth(Gdx.graphics.getWidth());
         stage.addActor(title);
 
-            //ADDING BACK BUTTON
+        //ADDING BACK BUTTON
         TextButton backButton = new TextButton("Back",MyGdxGame.gameSkin);
         backButton.setWidth(Gdx.graphics.getWidth()/5);
         backButton.setPosition(Gdx.graphics.getWidth()-(backButton.getWidth()+10),Gdx.graphics.getHeight()-(backButton.getHeight()-20));
@@ -171,18 +153,25 @@ public class GameScreen implements Screen, InputProcessor {
                 return true;
             }
         });
-        stage.addActor(backButton);*/
+        stage.addActor(backButton);
+
+        pipeSprite = new Sprite(pipe);
+        Array<Pipe> pipesBottom = new Array();
+
+        topPipeSprite = new Sprite(pipe);
+        Array<Pipe> pipesTop = new Array();
+        topPipeSprite.flip(false,true);
 
         int pipeX = (int)groundBody.getPosition().x;
-        for(int i = 0;i<10000000; i++){
-            float randomHeight = (float)Math.random()*1/8;
-            pipeSprite.setPosition(pipeX,randomHeight-20);
-            pipeSprite.setSize(pipe.getWidth()*2/3, pipe.getHeight());
-            pipeBody = new Pipe(world, pipe,pipeX,(int)randomHeight);
+        for(int i = 0;i<Gdx.graphics.getWidth(); i++){
+            float randomHeight = (float)Math.random()*130;
+            pipesBottom.add(new Pipe(pipeSprite,new Vector2(pipeX,(int)randomHeight)));
+            stage.addActor(pipesBottom.get(i));
+
+            pipesTop.add(new Pipe(topPipeSprite,new Vector2(pipeX,Gdx.graphics.getHeight()-(int)randomHeight)));
+            stage.addActor(pipesTop.get(i));
             pipeX+=250;
         }
-
-
     }
 
     @Override
@@ -204,6 +193,8 @@ public class GameScreen implements Screen, InputProcessor {
         groundSprite.setPosition(groundBody.getPosition().x-groundSprite.getWidth()/2, groundBody.getPosition().y-groundSprite.getHeight()/2);
         groundSprite.setRotation((float)Math.toDegrees(groundBody.getAngle()));
 
+
+
         Gdx.gl.glClearColor(135/256f,206/256f,235/256f,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -217,14 +208,9 @@ public class GameScreen implements Screen, InputProcessor {
         groundBody.setGravityScale(0);
 
         batch.begin();
-        int pipeX = (int)groundBody.getPosition().x;
         if (drawSprite) {
+
             batch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(), sprite.getOriginY(), sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(), sprite.getScaleY(), sprite.getRotation());
-            for(int i = 0;i<Gdx.graphics.getWidth(); i++){
-                float randomHeight = ranNumbers[i];
-                batch.draw(pipeSprite, pipeX, randomHeight-20, pipeSprite.getOriginX(), pipeSprite.getOriginY(), pipeSprite.getWidth()*2/3, pipeSprite.getHeight(), pipeSprite.getScaleX(), pipeSprite.getScaleY(), pipeSprite.getRotation());
-                pipeX+=250;
-            }
             batch.draw(groundSprite, groundSprite.getX(), groundSprite.getY(), groundSprite.getOriginX(), groundSprite.getOriginY(), groundSprite.getWidth(), groundSprite.getHeight(), groundSprite.getScaleX(), groundSprite.getScaleY(), groundSprite.getRotation());
 
         }
@@ -233,7 +219,6 @@ public class GameScreen implements Screen, InputProcessor {
             debugRenderer.render(world, debugMatrix);
         }
 
-        //camera.translate();
     }
 
     @Override

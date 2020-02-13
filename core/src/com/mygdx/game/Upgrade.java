@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -29,7 +30,6 @@ public class Upgrade extends Actor {
         setOrigin(x,y);
         backProgressBar = new Texture(Gdx.files.internal("imgs/backProgress.png"));
         frontProgressBar = new Texture(Gdx.files.internal("imgs/frontProgress.png"));
-        lvl=0;
         pixelPerProgress = frontProgressBar.getWidth()/maxLvl;
 
         upgradeButton = new TextButton("Upgrade", MyGdxGame.gameSkin);
@@ -57,8 +57,12 @@ public class Upgrade extends Actor {
 
 
     }
+
     public int multFunction(int level){
         return level;
+    }
+    public void setBehavior(Body bdy){
+        return;
     }
 
     @Override
