@@ -27,6 +27,7 @@ public class MyGdxGame extends Game {
 	public void create () {
 		stage = new Stage(new ScreenViewport());
 		gameSkin = new Skin(Gdx.files.internal("pixthulhu/skin/pixthulhu-ui.json"));
+		Gdx.graphics.setWindowedMode(1280,720);
 		this.setScreen(new TitleScreen(this));
 
 	}

@@ -28,7 +28,7 @@ public class TitleScreen implements Screen {
 
         Label title = new Label("Good gam", MyGdxGame.gameSkin);
         title.setAlignment(Align.center);
-        title.setY(Gdx.graphics.getHeight()*2/3);
+        title.setY(Gdx.graphics.getHeight()*7/8);
         title.setWidth(Gdx.graphics.getWidth());
         stage.addActor(title);
 
@@ -49,7 +49,7 @@ public class TitleScreen implements Screen {
 
         TextButton optionsButton = new TextButton("Options",MyGdxGame.gameSkin);
         optionsButton.setWidth(Gdx.graphics.getWidth()/2);
-        optionsButton.setPosition(Gdx.graphics.getWidth()/2-optionsButton.getWidth()/2,upgradeButton.getY()-optionsButton.getHeight()/2-20);
+        optionsButton.setPosition(Gdx.graphics.getWidth()/2-optionsButton.getWidth()/2,upgradeButton.getY()-optionsButton.getHeight()/2-upgradeButton.getHeight()/2-20);
         optionsButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {

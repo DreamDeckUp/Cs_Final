@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
@@ -32,6 +33,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.ParallaxBackground;
+import com.mygdx.game.Pipe;
 
 public class GameScreen implements Screen, InputProcessor {
     SpriteBatch batch, groundBatch;
@@ -44,12 +46,13 @@ public class GameScreen implements Screen, InputProcessor {
     Matrix4 debugMatrix;
     Texture pipe;
     Sprite pipeSprite;
-    Body pipeBody;
     int[] ranNumbers= new int[Gdx.graphics.getWidth()];
 
     private float elapsed = 0;
     float torque = 0.0f;
     boolean drawSprite = true;
+    boolean drawDebug = true;
+    Pipe pipeBody;
 
     private Stage stage;
     private Game game;
@@ -60,8 +63,8 @@ public class GameScreen implements Screen, InputProcessor {
         stage = new Stage(new ScreenViewport());
         camera = (OrthographicCamera)stage.getViewport().getCamera();
 
-        for(int i =0;i<ranNumbers.length;i++){
-            ranNumbers[i] = (int)(Math.random()*Gdx.graphics.getHeight()*1/5);
+        for(int i =0;i<ranNumbers.length;i++) {
+            ranNumbers[i] = (int) (Math.random() * Gdx.graphics.getHeight() * 1 / 7);
             System.out.println(ranNumbers[i]);
         }
 
@@ -86,6 +89,8 @@ public class GameScreen implements Screen, InputProcessor {
         TextureRegion textureRegion = new TextureRegion(groundImg);
         textureRegion.setRegion(10,0,groundImg.getWidth()*100000,groundImg.getHeight());
         groundSprite = new Sprite(textureRegion);
+        groundSprite.setSize(groundSprite.getWidth(),groundSprite.getHeight()*2);
+
 
         groundSprite.setPosition(0, 30);
 
@@ -95,8 +100,8 @@ public class GameScreen implements Screen, InputProcessor {
 
         groundBody = world.createBody(groundDef);
         //BALL SHAPE
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(sprite.getWidth()/2, sprite.getHeight()/2);
+        CircleShape shape = new CircleShape();
+        shape.setRadius(sprite.getWidth()/2+3);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
@@ -107,7 +112,7 @@ public class GameScreen implements Screen, InputProcessor {
         shape.dispose();
         //GROUND SHAPE
         PolygonShape groundShape = new PolygonShape();
-        groundShape.setAsBox(Gdx.graphics.getWidth()*1000, groundSprite.getHeight()/2-25);
+        groundShape.setAsBox(Gdx.graphics.getWidth()*1000, groundSprite.getHeight()/2-50);
 
         FixtureDef groundFixtureDef = new FixtureDef();
         groundFixtureDef.shape = groundShape;
@@ -116,12 +121,12 @@ public class GameScreen implements Screen, InputProcessor {
         groundBody.createFixture(groundFixtureDef);
 
         pipe = new Texture(Gdx.files.internal("imgs/pipe.png"));
-        pipe.setWrap(Texture.TextureWrap.MirroredRepeat, Texture.TextureWrap.MirroredRepeat);
-        TextureRegion pipes = new TextureRegion(pipe);
-        pipes.setRegion(0, 0, pipe.getWidth(), pipe.getHeight()*2);
-        pipeSprite = new Sprite(pipes);
-        BodyDef pipeDef = new BodyDef();
-        pipeDef.type = BodyDef.BodyType.StaticBody;
+        pipeSprite = new Sprite(pipe);
+
+
+
+
+
 
 
 
@@ -168,6 +173,15 @@ public class GameScreen implements Screen, InputProcessor {
         });
         stage.addActor(backButton);*/
 
+        int pipeX = (int)groundBody.getPosition().x;
+        for(int i = 0;i<10000000; i++){
+            float randomHeight = (float)Math.random()*1/8;
+            pipeSprite.setPosition(pipeX,randomHeight-20);
+            pipeSprite.setSize(pipe.getWidth()*2/3, pipe.getHeight());
+            pipeBody = new Pipe(world, pipe,pipeX,(int)randomHeight);
+            pipeX+=250;
+        }
+
 
     }
 
@@ -199,7 +213,7 @@ public class GameScreen implements Screen, InputProcessor {
         stage.act();
         stage.draw();
 
-        groundBody.setLinearVelocity(new Vector2(-1000,0));
+        groundBody.setLinearVelocity(new Vector2(-100,0));
         groundBody.setGravityScale(0);
 
         batch.begin();
@@ -208,7 +222,6 @@ public class GameScreen implements Screen, InputProcessor {
             batch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(), sprite.getOriginY(), sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(), sprite.getScaleY(), sprite.getRotation());
             for(int i = 0;i<Gdx.graphics.getWidth(); i++){
                 float randomHeight = ranNumbers[i];
-
                 batch.draw(pipeSprite, pipeX, randomHeight-20, pipeSprite.getOriginX(), pipeSprite.getOriginY(), pipeSprite.getWidth()*2/3, pipeSprite.getHeight(), pipeSprite.getScaleX(), pipeSprite.getScaleY(), pipeSprite.getRotation());
                 pipeX+=250;
             }
@@ -216,8 +229,10 @@ public class GameScreen implements Screen, InputProcessor {
 
         }
         batch.end();
+        if(drawDebug){
+            debugRenderer.render(world, debugMatrix);
+        }
 
-        debugRenderer.render(world, debugMatrix);
         //camera.translate();
     }
 
@@ -267,6 +282,8 @@ public class GameScreen implements Screen, InputProcessor {
             torque += 20f;
         if(keycode == Input.Keys.S)
             torque -= 20f;
+        if(keycode == Input.Keys.L)
+            drawDebug=!drawDebug;
 
         // Remove the torque using backslash /
         if(keycode == Input.Keys.BACKSLASH)
@@ -299,7 +316,7 @@ public class GameScreen implements Screen, InputProcessor {
     // This could result in the object "spinning"
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        body.applyForceToCenter(0f,20000000f,true);
+        body.applyForceToCenter(0f,2000000000f,true);
         //body.applyTorque(0.4f,true);
         //game.setScreen(new TitleScreen(game));
         return true;
