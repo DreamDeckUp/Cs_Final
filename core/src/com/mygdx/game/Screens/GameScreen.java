@@ -3,6 +3,7 @@ package com.mygdx.game.Screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -77,7 +78,7 @@ public class GameScreen implements Screen, InputProcessor {
         body = world.createBody(bodyDef);
         //GROUND BODY
         groundImg = new Texture("imgs/grass.png");
-        groundImg.setWrap(Texture.TextureWrap.MirroredRepeat, Texture.TextureWrap.MirroredRepeat);
+        groundImg.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         TextureRegion textureRegion = new TextureRegion(groundImg);
         textureRegion.setRegion(10,0,groundImg.getWidth()*100000,groundImg.getHeight());
         groundSprite = new Sprite(textureRegion);
@@ -114,7 +115,11 @@ public class GameScreen implements Screen, InputProcessor {
         pipe = new Texture(Gdx.files.internal("imgs/pipe.png"));
 
         //ADDING INPUTS
-        Gdx.input.setInputProcessor(this);
+        InputMultiplexer mult = new InputMultiplexer();
+        mult.addProcessor(stage);
+        mult.addProcessor(this);
+        Gdx.input.setInputProcessor(mult);
+
         System.out.println(body.getMass());
         debugRenderer = new Box2DDebugRenderer();
         //REST IS IN RENDER
@@ -153,7 +158,7 @@ public class GameScreen implements Screen, InputProcessor {
                 return true;
             }
         });
-        stage.addActor(backButton);
+
 
         pipeSprite = new Sprite(pipe);
         Array<Pipe> pipesBottom = new Array();
@@ -172,6 +177,7 @@ public class GameScreen implements Screen, InputProcessor {
             stage.addActor(pipesTop.get(i));
             pipeX+=250;
         }
+        stage.addActor(backButton);
     }
 
     @Override
