@@ -6,9 +6,9 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.Screens.GameScreen;
 
-import java.awt.Color;
+
+
 
 public class ParallaxBackground extends Actor {
 
@@ -16,13 +16,13 @@ public class ParallaxBackground extends Actor {
     private Array<Texture> layers;
     private Texture grassTexture;
     private final int LAYER_SPEED_DIFFERENCE = 2;
-    public int thing = 0;
+
 
     float x,y,width,heigth,scaleX,scaleY;
     int originX, originY,rotation,srcX,srcY;
     boolean flipX,flipY;
 
-    private int speed;
+    private float speed;
 
     public ParallaxBackground(Array<Texture> textures){
         layers = textures;
@@ -43,13 +43,14 @@ public class ParallaxBackground extends Actor {
         heigth = Gdx.graphics.getHeight();
         scaleX = scaleY = 1;
         flipX = flipY = false;
+
     }
 
     public void setSpeed(int newSpeed){
 
         this.speed = newSpeed;
     }
-    public int getSpeed(){
+    public float getSpeed(){
         return speed;
     }
 
@@ -58,7 +59,7 @@ public class ParallaxBackground extends Actor {
     public void draw(Batch batch, float parentAlpha) {
         batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
 
-        scroll+=speed;
+        scroll+=speed/3;
         for(int i = 0;i<layers.size;i++) {
             srcX = scroll + i*this.LAYER_SPEED_DIFFERENCE *scroll;
             batch.draw(layers.get(i), x, y, originX, originY, width, heigth,scaleX,scaleY,rotation,srcX,srcY,layers.get(i).getWidth(),layers.get(i).getHeight(),flipX,flipY);

@@ -21,17 +21,20 @@ public class Pipe extends Actor {
     Vector2 pos;
     Vector2 size;
     Body pipeBody;
+    final float PIXEL_TO_METERS = 100f;
 
     public Pipe(Sprite img, Vector2 pos){
         this.img=img;
         this.pos=pos;
+        Vector2 imgPos = new Vector2(img.getX(),img.getY());
         pipeBody = GameScreen.groundBody;
+
 
 
         size = new Vector2(img.getWidth()/2,img.getHeight()/2);
 
         shape = new PolygonShape();
-        shape.setAsBox(img.getWidth()/2, img.getHeight()/2, pipeBody.getPosition().add(pos), 0);
+        shape.setAsBox(img.getWidth()/2, img.getHeight()/2, imgPos.add(pos), 0);
 
 
 
