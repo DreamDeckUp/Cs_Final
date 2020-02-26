@@ -18,14 +18,20 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -36,23 +42,25 @@ import com.mygdx.game.Pipe;
 public class GameScreen implements Screen, InputProcessor {
     SpriteBatch batch;
     Sprite sprite, topPipeSprite, groundSprite;
-
     Texture img, groundImg;
+    Texture pipe;
+    Sprite pipeSprite;
+    Label title;
+
     World world;
     Body body;
     public static Body groundBody;
     Box2DDebugRenderer debugRenderer;
     Matrix4 debugMatrix;
-    Texture pipe;
-    Sprite pipeSprite;
-    int pipeX;
 
+    int pipeX;
     float torque = 0.0f;
     boolean drawSprite = true;
     boolean drawDebug = true;
+    boolean changedScreen;
 
     private Stage stage;
-    private Game game;
+    Game game;
     private OrthographicCamera camera;
 
     final float PIXEL_TO_METERS = 100f;
@@ -62,6 +70,7 @@ public class GameScreen implements Screen, InputProcessor {
         game = aGame;
         stage = new Stage(new ScreenViewport());
         camera = (OrthographicCamera)stage.getViewport().getCamera();
+        changedScreen=false;
 
         //PHYSICS
         batch = new SpriteBatch();
@@ -73,9 +82,11 @@ public class GameScreen implements Screen, InputProcessor {
         topPipeSprite.flip(false,true);
         sprite = new Sprite(img);
 
+
         sprite.setPosition(Gdx.graphics.getWidth()/2-sprite.getWidth()/2, Gdx.graphics.getHeight()/2-sprite.getHeight()/2);
 
-        world = new World(new Vector2(0, -9.8f), true);
+        world = new World(new Vector2(0, -98f), true);
+        world.setContactListener(new CollisionListener());
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -90,7 +101,7 @@ public class GameScreen implements Screen, InputProcessor {
         groundSprite = new Sprite(textureRegion);
 
         BodyDef groundDef = new BodyDef();
-        groundDef.type = BodyDef.BodyType.DynamicBody;
+        groundDef.type = BodyDef.BodyType.KinematicBody;
         groundDef.position.set(0,0);
 
         groundBody = world.createBody(groundDef);
@@ -104,6 +115,7 @@ public class GameScreen implements Screen, InputProcessor {
 
         body.createFixture(fixtureDef);
 
+
         shape.dispose();
         //GROUND SHAPE
         PolygonShape groundShape = new PolygonShape();
@@ -114,7 +126,7 @@ public class GameScreen implements Screen, InputProcessor {
         groundFixtureDef.density = 1f;
 
         groundBody.createFixture(groundFixtureDef);
-        groundBody.setGravityScale(0);
+        groundBody.setLinearVelocity(new Vector2(-1000f,0));
 
 
 
@@ -142,7 +154,7 @@ public class GameScreen implements Screen, InputProcessor {
         stage.addActor(parallaxBackground);
 
         //ADDING TITLE
-        Label title = new Label("Playing Screen", MyGdxGame.gameSkin);
+        title = new Label("Welcome to AI launcher", MyGdxGame.gameSkin);
         title.setAlignment(Align.center);
         title.setY(Gdx.graphics.getHeight()*2/3);
         title.setWidth(Gdx.graphics.getWidth());
@@ -172,10 +184,12 @@ public class GameScreen implements Screen, InputProcessor {
         stage.addActor(title);
     }
     public void addPipe(){
-        float randomHeight = ((float)Math.random()*sprite.getHeight()*3/2)-pipeSprite.getHeight()/6;
-        Pipe pipeBottom = new Pipe(pipeSprite,new Vector2(pipeX,(int)randomHeight));
+        float randomHeight1 = ((float)Math.random()*sprite.getHeight()*3/2)-pipeSprite.getHeight()/6;
+        float randomHeight2 = ((float)Math.random()*sprite.getHeight()*3/2)-pipeSprite.getHeight()/6;
+
+        Pipe pipeBottom = new Pipe(pipeSprite,new Vector2(pipeX,(int)randomHeight1));
         stage.addActor(pipeBottom);
-        Pipe pipeTop = new Pipe(topPipeSprite,new Vector2(pipeX,Gdx.graphics.getHeight()-(int)randomHeight));
+        Pipe pipeTop = new Pipe(topPipeSprite,new Vector2(pipeX,Gdx.graphics.getHeight()-(int)randomHeight2));
         stage.addActor(pipeTop);
         pipeX+=pipeSprite.getWidth();
     }
@@ -195,11 +209,11 @@ public class GameScreen implements Screen, InputProcessor {
 
         sprite.setPosition(body.getPosition().x-sprite.getWidth()/2, body.getPosition().y-sprite.getHeight()/2);
         sprite.setRotation((float)Math.toDegrees(body.getAngle()));
+        title.setX(groundBody.getPosition().x);
 
         groundSprite.setPosition(groundBody.getPosition().x-groundSprite.getWidth()/2, groundBody.getPosition().y-groundSprite.getHeight()/2);
         groundSprite.setRotation((float)Math.toDegrees(groundBody.getAngle()));
 
-        groundBody.setLinearVelocity(body.linVelLoc.scl(-1f));
 
         Gdx.gl.glClearColor(135/256f,206/256f,235/256f,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -207,8 +221,8 @@ public class GameScreen implements Screen, InputProcessor {
         batch.setProjectionMatrix(camera.combined);
         debugMatrix = batch.getProjectionMatrix().cpy().scale(1, 1, 0);
 
-        parallaxBackground.setSpeed((int)body.getLinearVelocity().x);
-        stage.act();
+        //parallaxBackground.setSpeed((int)body.getLinearVelocity().x);
+        stage.act(1/60f);
         stage.draw();
 
 
@@ -264,7 +278,7 @@ public class GameScreen implements Screen, InputProcessor {
             body.applyForceToCenter(-10000f, 0f,true);
 
         if(keycode == Input.Keys.UP)
-            body.applyForceToCenter(0f,10f,true);
+            body.applyForce(new Vector2(0,1000f), body.getPosition(),true);
             addPipe();
         if(keycode == Input.Keys.DOWN)
             body.applyForceToCenter(0f, -10f, true);
@@ -335,6 +349,66 @@ public class GameScreen implements Screen, InputProcessor {
     public boolean scrolled(int amount) {
         camera.zoom+=amount;
         return true;
+    }
+
+    public class CollisionListener implements ContactListener {
+        @Override
+        public void beginContact(Contact contact) {
+            Body bodyA = contact.getFixtureA().getBody();
+            Body bodyB = contact.getFixtureB().getBody();
+            TextButton next = new TextButton("Continue", MyGdxGame.gameSkin);
+            groundBody.setLinearVelocity(Vector2.Zero);
+            next.addListener(new InputListener(){
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    game.setScreen(new UpgradeScreen(game));
+                    return true;
+                }
+
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+
+                }
+            });
+            if (bodyA.getType() == BodyDef.BodyType.KinematicBody || bodyB.getType() == BodyDef.BodyType.KinematicBody){
+                //Window fail = new Window("You failed", MyGdxGame.gameSkin);
+                if(changedScreen==false){
+                    changedScreen=true;
+                    Table table = new Table();
+                    table.setFillParent(true);
+                    table.setSkin(MyGdxGame.gameSkin);
+                    table.center().center();
+                    Label failLabel = new Label("Lol you died", MyGdxGame.gameSkin);
+                    failLabel.setFontScale(2f);
+                    table.add(failLabel).center();
+                    table.row();
+                    table.add(next).center();
+                    table.setDebug(drawDebug);
+                    stage.addActor(table);
+
+                }
+                System.out.println(changedScreen);
+
+
+
+            }
+
+        }
+
+        @Override
+        public void endContact(Contact contact) {
+
+        }
+
+        @Override
+        public void postSolve(Contact contact, ContactImpulse impulse) {
+
+        }
+
+        @Override
+        public void preSolve(Contact contact, Manifold oldManifold) {
+
+        }
     }
 
 
