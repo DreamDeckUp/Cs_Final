@@ -20,8 +20,11 @@ public class MyGdxGame extends Game {
 	Texture texture;
 	Stage stage;
 	public static Skin gameSkin;
-	private static Array<Component> components;
-	private static int currency;
+	private boolean isAiPlaying;
+	private boolean isMusicOn;
+	private boolean isEffectsOn;
+	private Array<Component> components;
+	private int currency;
 
 	@Override
 	public void create () {
@@ -29,6 +32,10 @@ public class MyGdxGame extends Game {
 		gameSkin = new Skin(Gdx.files.internal("pixthulhu/skin/pixthulhu-ui.json"));
 		this.setScreen(new TitleScreen(this));
 		currency = 1;
+
+		isAiPlaying = true;
+		isMusicOn = true;
+		isEffectsOn = true;
 
 		components = new Array<>();
 
@@ -57,4 +64,21 @@ public class MyGdxGame extends Game {
 	public void setCurrency(int currency){
 		this.currency = currency;
 	}
+
+	public boolean getIsAiPlaying(){
+		return isAiPlaying;
+	}
+
+	public void setIsAiPlaying(boolean isAiPlaying){this.isAiPlaying = isAiPlaying;
+		System.out.println("isAiPlaying is "+isAiPlaying);}
+
+	public boolean getIsMusicOn(){return isMusicOn;}
+
+	public void setIsMusicOn(boolean isMusicOn){this.isMusicOn = isMusicOn;
+		System.out.println("isMusicOn is "+isMusicOn);}
+
+	public boolean getIsEffectsOn(){return isEffectsOn;}
+
+	public void setIsEffectsOn(boolean isEffectsOn){this.isEffectsOn = isEffectsOn;
+		System.out.println("isEffectsOn is "+isEffectsOn);}
 }
