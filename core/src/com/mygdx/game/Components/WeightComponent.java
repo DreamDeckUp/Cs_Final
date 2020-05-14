@@ -13,6 +13,7 @@ public class WeightComponent extends Component {
 
     public double multFunction(){
         try{
+            //To understand the function, follow the link, the function for weight is in green: https://www.desmos.com/calculator/rwfquyorcg
             return Math.pow(super.getLvl()/5, 2)+1;
         }
         catch (Exception e){
@@ -23,6 +24,5 @@ public class WeightComponent extends Component {
 
     public void setLvl(double lvl){
         super.setLvl(lvl);
-        System.out.println("Changed weight component");
     }
 }

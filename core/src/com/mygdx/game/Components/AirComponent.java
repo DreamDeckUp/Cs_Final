@@ -13,6 +13,7 @@ public class AirComponent extends Component {
 
     public double multFunction(){
         try{
+            //To understand this function, follow the link, the air resistance function is in blue: https://www.desmos.com/calculator/rwfquyorcg
             return 20/super.getLvl();
         }
         catch (Exception e){
@@ -22,6 +23,5 @@ public class AirComponent extends Component {
     }
     public void setLvl(double lvl){
         super.setLvl(lvl);
-        System.out.println("Changed air component");
     }
 }

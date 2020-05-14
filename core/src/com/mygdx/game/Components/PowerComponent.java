@@ -13,6 +13,7 @@ public class PowerComponent extends Component {
 
     public double multFunction(){
         try {
+            //To understand the function, follow the link, the function is in red: https://www.desmos.com/calculator/rwfquyorcg
             return 20 * Math.pow(Math.log10(super.getLvl()), 2);
         }
         catch (Exception e){
@@ -23,6 +24,5 @@ public class PowerComponent extends Component {
 
     public void setLvl(double lvl){
         super.setLvl(lvl);
-        System.out.println("Changed power component");
     }
 }
