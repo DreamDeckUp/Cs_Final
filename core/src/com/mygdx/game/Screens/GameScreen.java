@@ -2,140 +2,207 @@ package com.mygdx.game.Screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Scaling;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.mygdx.game.Actors.Background;
+import com.mygdx.game.Actors.Cannon;
+import com.mygdx.game.Actors.Ground;
+import com.mygdx.game.Actors.Rocket;
+import com.mygdx.game.Actors.UserInterface;
 import com.mygdx.game.MyGdxGame;
-import com.mygdx.game.ParallaxBackground;
+import com.mygdx.game.Stats;
 
+import static com.mygdx.game.Constants.DEFAULT_ZOOM;
+import static com.mygdx.game.Constants.GRAVITY;
+import static com.mygdx.game.Constants.PPM;
 
-/**
- * Created by julienvillegas on 17/01/2017.
- */
-public class GameScreen implements Screen {
+public class GameScreen implements Screen, InputProcessor {
+    //Images
+    SpriteBatch batch;
+    Texture groundTexture, cannonSheet,backgroundTexture,rocketSheet,boostIcon;
 
+    //Actors
+    Rocket rocket;
+    Cannon cannon;
+    Background background;
+    Ground ground;
+    UserInterface userInterface;
+
+    World world;
+
+    //Debug
+    Box2DDebugRenderer debugRenderer;
+    Matrix4 debugMatrix;
+    boolean drawDebug = false;
+
+    //State control
+    boolean changedScreen;
+    public static boolean rocketLaunched ;
     private Stage stage;
-    private Game game;
-    private OrthographicCamera camera;
+    public static Game game;
+    public static OrthographicCamera camera;
+    public static Viewport viewport;
 
     public GameScreen(Game aGame) {
+        //Variable initialisation
         game = aGame;
-        stage = new Stage(new ScreenViewport());
+        stage = new Stage();
+        changedScreen = false;
+        batch = new SpriteBatch();
+        rocketLaunched=false;
+        viewport = new FitViewport(640/PPM, 480/PPM,camera);
         camera = (OrthographicCamera)stage.getViewport().getCamera();
+        camera.zoom = DEFAULT_ZOOM;
+
+        //World init
+        world = new World(GRAVITY, true);
+        world.setContactListener(new CollisionListener());
+        Gdx.graphics.setVSync(true);
+
+        //Textures init
+        cannonSheet = new Texture(Gdx.files.internal("imgs/cannonSheet.png"));
+        rocketSheet = new Texture(Gdx.files.internal("imgs/rocket.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("imgs/background.png"));
+        groundTexture = new Texture("imgs/sand.png");
+        boostIcon = new Texture(Gdx.files.internal("icons/motor_efficiency_icon.png"));
 
 
-        Array<Texture> textures = new Array<Texture>();
-        for(int i = 2; i <=6;i++){
-            textures.add(new Texture(Gdx.files.internal("parallax/img"+i+".png")));
-            textures.get(textures.size-1).setWrap(Texture.TextureWrap.MirroredRepeat, Texture.TextureWrap.MirroredRepeat);
-        }
+        //Actor init
+        rocket = new Rocket(rocketSheet, world);
+        ground = new Ground(groundTexture, world);
+        cannon = new Cannon(cannonSheet,ground);
+        background = new Background(backgroundTexture, ground);
+        userInterface= new UserInterface(boostIcon);
 
-
-
-        final ParallaxBackground parallaxBackground = new ParallaxBackground(textures);
-        parallaxBackground.setSize(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
-        parallaxBackground.setSpeed(1);
-
-        stage.addActor(parallaxBackground);
-
-        Label title = new Label("Playing Screen", MyGdxGame.gameSkin);
-        title.setAlignment(Align.center);
-        title.setY(Gdx.graphics.getHeight()*2/3);
-        title.setWidth(Gdx.graphics.getWidth());
-        stage.addActor(title);
-
-        TextButton speedButton = new TextButton("+Speed", MyGdxGame.gameSkin);
-        speedButton.setWidth(Gdx.graphics.getWidth()/5);
-        speedButton.setPosition(0, Gdx.graphics.getHeight()-speedButton.getHeight()-10);
-        speedButton.addListener(new InputListener(){
+        userInterface.launchButton.addListener(new InputListener(){
             @Override
-            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
-                parallaxBackground.setSpeed(parallaxBackground.getSpeed()+1);
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                launch();
+                return super.touchDown(event, x, y, pointer, button);
             }
-            @Override
-            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                return true;
-            }
-        });
-        stage.addActor(speedButton);
 
-        TextButton nospeedButton = new TextButton("-Speed", MyGdxGame.gameSkin);
-        nospeedButton.setWidth(Gdx.graphics.getWidth()/5);
-        nospeedButton.setPosition(0, Gdx.graphics.getHeight()-(2*nospeedButton.getHeight())-10);
-        nospeedButton.addListener(new InputListener(){
             @Override
-            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
-                parallaxBackground.setSpeed(parallaxBackground.getSpeed()-1);
-            }
-            @Override
-            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                return true;
-            }
-        });
-        stage.addActor(nospeedButton);
-
-
-        TextButton pauseButton = new TextButton("Stop",MyGdxGame.gameSkin);
-        pauseButton.setWidth(Gdx.graphics.getWidth()/5);
-        pauseButton.setPosition(Gdx.graphics.getWidth()-(pauseButton.getWidth()+10),Gdx.graphics.getHeight()-(2*pauseButton.getHeight()-20));
-        pauseButton.addListener(new InputListener(){
-            @Override
-            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
-                parallaxBackground.setSpeed(0);
-
-            }
-            @Override
-            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                return true;
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                super.touchUp(event, x, y, pointer, button);
             }
         });
 
-        stage.addActor(pauseButton);
+        //Adding actors
+        stage.addActor(background);
+        stage.addActor(cannon);
+        stage.addActor(ground);
+        stage.addActor(rocket);
+        stage.addActor(userInterface);
+        userInterface.moveButtons();
 
-        TextButton backButton = new TextButton("Back",MyGdxGame.gameSkin);
-        backButton.setWidth(Gdx.graphics.getWidth()/5);
-        backButton.setPosition(Gdx.graphics.getWidth()-(backButton.getWidth()+10),Gdx.graphics.getHeight()-(backButton.getHeight()-20));
-        backButton.addListener(new InputListener(){
-            @Override
-            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
-                game.setScreen(new TitleScreen(game));
-            }
-            @Override
-            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                return true;
-            }
-        });
-        stage.addActor(backButton);
-
+        //ADDING INPUTS
+        InputMultiplexer mult = new InputMultiplexer();
+        mult.addProcessor(stage);
+        mult.addProcessor(this);
+        Gdx.input.setInputProcessor(mult);
+        //debug
+        debugRenderer = new Box2DDebugRenderer();
 
     }
+
 
     @Override
     public void show() {
         Gdx.app.log("MainScreen","show");
-        Gdx.input.setInputProcessor(stage);
-
     }
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(135/256f,206/256f,235/256f,1);
+        //Back coloration and gl handling
+        Gdx.gl.glClearColor(255/256f,212/256f,167/256f,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        stage.act();
+
+        //Camera
+        camera.position.set(rocket.body.getPosition().x, Gdx.graphics.getHeight()/2,0);
+        camera.update();
+
+        //World physics interpolation
+        world.step(1/60f, 6, 2);
+
+        //debug
+        batch.setProjectionMatrix(camera.combined);
+        debugMatrix = batch.getProjectionMatrix().cpy().scale(1, 1, 0);
+
+        //Rocket boosting
+        if(rocketLaunched) {
+            if (userInterface.boostButton.isPressed()) {
+                boost();
+            } else {
+                rocket.stateTime = 0;
+            }
+        }
+        buttonInput();
+        userInterface.moveButtons();
+        stage.act(1/60f);
         stage.draw();
+        if(drawDebug){
+            debugRenderer.render(world, debugMatrix);
+        }
+
     }
+
+    public void launch(){
+        if(!rocketLaunched){
+            cannon.stateTime+=Gdx.graphics.getDeltaTime();
+            Vector2 launchVec = new Vector2(1000000,1000000).scl((float) Stats.cannonStrength);
+            launchVec.scl((float)(1/Stats.weight));
+            rocket.launch(rocket.body, launchVec);
+            rocketLaunched=true;
+            System.out.println(Stats.cannonStrength);
+        }
+    }
+    public void boost(){
+        if(Stats.currentFuel>0) {
+            rocket.stateTime += Gdx.graphics.getDeltaTime();
+            float addedVel = 20000*(float)Stats.power;
+            Vector2 pos = rocket.body.getPosition();
+            Vector2 localDirectionVector = rocket.body.getLocalPoint(new Vector2(pos.x + rocket.sprite.getWidth() / 2, pos.y - rocket.sprite.getHeight() / 2));
+            float angle = -1 * (float) Math.toRadians(localDirectionVector.angle());
+            rocket.body.setLinearVelocity(rocket.body.getLinearVelocity().add(new Vector2(addedVel*(float)Math.cos(angle),addedVel* (float) Math.sin(angle))));
+        }
+        float consumption = (float)((Stats.fuel/100)/Stats.efficiency);
+        Stats.currentFuel = (Stats.currentFuel-consumption);
+        System.out.println(Stats.currentFuel);
+    }
+    public void buttonInput(){
+        if(Gdx.input.isTouched()){
+            drawDebug=true;
+        }
+        if(userInterface.right.isPressed()){
+            rocket.body.setAngularVelocity(-1f);
+        }
+        if(userInterface.left.isPressed()){
+            rocket.body.setAngularVelocity(1f);
+        }
+    }
+
 
     @Override
     public void resize(int width, int height) {
@@ -159,7 +226,104 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+        world.dispose();
         stage.dispose();
+        debugRenderer.dispose();
+
     }
+
+    public boolean keyDown(int keycode){
+        return false;
+    }
+    public boolean keyUp(int keycode) {return false; }
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char character) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(int amount) {
+        camera.zoom+=amount*0.5;
+        return true;
+    }
+
+    public class CollisionListener implements ContactListener {
+        @Override
+        public void beginContact(Contact contact) {
+            Body bodyA = contact.getFixtureA().getBody();
+            Body bodyB = contact.getFixtureB().getBody();
+            TextButton next = new TextButton("Continue", MyGdxGame.gameSkin);
+            ground.body.setLinearVelocity(Vector2.Zero);
+            next.addListener(new InputListener(){
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    game.setScreen(new UpgradeScreen(game));
+                    rocketLaunched=false;
+                    return true;
+                }
+
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+
+                }
+            });
+            //Check if one body is kinematic, end game if true
+            if (bodyA.getType() == BodyDef.BodyType.KinematicBody || bodyB.getType() == BodyDef.BodyType.KinematicBody){
+                if(!changedScreen){
+                    changedScreen=true;
+                    Label failLabel = new Label("CRASH!", MyGdxGame.gameSkin);
+                    failLabel.setFontScale(2f);
+                    failLabel.setPosition(rocket.body.getPosition().x,rocket.body.getPosition().y+failLabel.getHeight()+next.getHeight()+50);
+                    next.setPosition(failLabel.getX()-(next.getWidth()-failLabel.getWidth())/4, failLabel.getY()-next.getHeight()-10);
+                    rocket.body.setType(BodyDef.BodyType.StaticBody);
+                    stage.addActor(next);
+                    stage.addActor(failLabel);
+                    MyGdxGame.setCurrency(MyGdxGame.getCurrency()+1);
+                }
+
+
+
+            }
+
+        }
+
+        @Override
+        public void endContact(Contact contact) {
+
+        }
+
+        @Override
+        public void postSolve(Contact contact, ContactImpulse impulse) {
+
+        }
+
+        @Override
+        public void preSolve(Contact contact, Manifold oldManifold) {
+
+        }
+
+    }
+
+
 }
 
