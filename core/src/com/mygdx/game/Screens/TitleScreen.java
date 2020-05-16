@@ -3,15 +3,12 @@ package com.mygdx.game.Screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MyGdxGame;
@@ -24,17 +21,14 @@ public class TitleScreen implements Screen {
     public TitleScreen(Game aGame) {
         game = aGame;
         stage = new Stage(new ScreenViewport());
+        //Adding the Background to the screen
         addBackground();
 
-        Label title = new Label("Good gam", MyGdxGame.gameSkin);
-        title.setAlignment(Align.center);
-        title.setY(Gdx.graphics.getHeight()*7/8);
-        title.setWidth(Gdx.graphics.getWidth());
-        stage.addActor(title);
-
-        TextButton upgradeButton = new TextButton("Upgrades",MyGdxGame.gameSkin);
-        upgradeButton.setWidth(Gdx.graphics.getWidth()/2);
-        upgradeButton.setPosition(Gdx.graphics.getWidth()/2-upgradeButton.getWidth()/2,Gdx.graphics.getHeight()/3-upgradeButton.getHeight()/2);
+        //Adding the button leading to the upgrade screen
+        TextButton upgradeButton = new TextButton("Upgrades", MyGdxGame.gameSkin);
+        upgradeButton.setWidth(Gdx.graphics.getWidth()/5);
+        upgradeButton.setPosition(Gdx.graphics.getWidth()/6,Gdx.graphics.getHeight()/5);
+        //Adding a listener to the button that displays the upgrae screen upon being clicked
         upgradeButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
@@ -45,11 +39,14 @@ public class TitleScreen implements Screen {
                 return true;
             }
         });
+        //Adding the button to the stage
         stage.addActor(upgradeButton);
 
-        TextButton optionsButton = new TextButton("Options",MyGdxGame.gameSkin);
-        optionsButton.setWidth(Gdx.graphics.getWidth()/2);
-        optionsButton.setPosition(Gdx.graphics.getWidth()/2-optionsButton.getWidth()/2,upgradeButton.getY()-optionsButton.getHeight()/2-upgradeButton.getHeight()/2-20);
+        //Adding a button leading to the option screen
+        TextButton optionsButton = new TextButton("Options", MyGdxGame.gameSkin);
+        optionsButton.setWidth(Gdx.graphics.getWidth()/5);
+        optionsButton.setPosition(Gdx.graphics.getWidth()-Gdx.graphics.getWidth()/6-optionsButton.getWidth(),Gdx.graphics.getHeight()/5);
+        //Adding a listener to the button that displays the option screen upon being clicked
         optionsButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
@@ -60,11 +57,15 @@ public class TitleScreen implements Screen {
                 return true;
             }
         });
+        //Adding the button to the stage
         stage.addActor(optionsButton);
 
-        TextButton playButton = new TextButton("Play",MyGdxGame.gameSkin);
-        playButton.setWidth(Gdx.graphics.getWidth()/2);
-        playButton.setPosition(Gdx.graphics.getWidth()/2-playButton.getWidth()/2,upgradeButton.getY()+upgradeButton.getHeight()+20);
+        //Adding a button leading to the game screen
+        TextButton playButton = new TextButton("Play", MyGdxGame.gameSkin);
+        playButton.setWidth(Gdx.graphics.getWidth()/3);
+        playButton.setHeight(Gdx.graphics.getHeight()/8);
+        playButton.setPosition(Gdx.graphics.getWidth()/2-playButton.getWidth()/2,Gdx.graphics.getHeight()/18);
+        //Adding a listener to the button that displays the game screen upon being clicked
         playButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
@@ -75,11 +76,12 @@ public class TitleScreen implements Screen {
                 return true;
             }
         });
+        //Adding the button to the stage
         stage.addActor(playButton);
     }
-
+    //Method that adds the background to the stage
     public void addBackground(){
-        Texture texture = new Texture(Gdx.files.internal("imgs/background.jpg"));
+        Texture texture = new Texture(Gdx.files.internal("imgs/autopilot_logo.png"));
         Image background = new Image(texture);
         background.setScaling(Scaling.fill);
         background.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -94,8 +96,6 @@ public class TitleScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(1, 1, 1, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act();
         stage.draw();
     }
