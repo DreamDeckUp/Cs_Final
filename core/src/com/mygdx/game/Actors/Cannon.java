@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public class Cannon extends Actor {
     Texture cannonSheet;
-    Animation<TextureRegion> cannonAnimation;
+    public Animation<TextureRegion> cannonAnimation;
     Sprite sprite;
     Ground ground;
 
@@ -26,22 +26,23 @@ public class Cannon extends Actor {
         TextureRegion[][] tmp2 = TextureRegion.split(cannonSheet,
                 cannonSheet.getWidth()/2,
                 cannonSheet.getHeight()/4);
-        TextureRegion[] cannonFrames = new TextureRegion[9];
+        TextureRegion[] cannonFrames = new TextureRegion[8];
         int index = 0;
         for (int i = 0; i < FRAME_ROWS; i++) {
             for (int j = 0; j < FRAME_COLS; j++) {
                 cannonFrames[index++] = tmp2[i][j];
             }
         }
-        cannonAnimation = new Animation<TextureRegion>(0.025f, cannonFrames);
+        cannonAnimation = new Animation<TextureRegion>(0.25f, cannonFrames);
         sprite = new Sprite(cannonFrames[0]);
         sprite.setPosition(0, ground.sprite.getHeight()+25);
+
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
-        TextureRegion currentCannonFrame = cannonAnimation.getKeyFrame(stateTime, true);
+        TextureRegion currentCannonFrame = cannonAnimation.getKeyFrame(stateTime, false);
         if(drawSprite){
             batch.draw(currentCannonFrame,
                     sprite.getX(),

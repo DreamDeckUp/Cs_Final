@@ -19,10 +19,12 @@ public class Rocket extends Actor {
     Animation<TextureRegion> rocketAnimation;
     public Sprite sprite;
 
+
     private static final int FRAME_COLS = 4, FRAME_ROWS = 1;
     public float stateTime;
     public Body body;
     public boolean drawSprite = false;
+    public static float currentFuel = Stats.currentFuel;
 
     public Rocket(Texture rocketSheet, World world){
         this.rocketSheet=rocketSheet;
@@ -51,6 +53,7 @@ public class Rocket extends Actor {
         //body.setTransform(75,200,-45);
         body.setFixedRotation(true);
         body.setAngularDamping(2f*(float)Stats.airResist);
+        body.setTransform(50,200,-45);
 
         //Rocket SHAPE
         PolygonShape shape = new PolygonShape();
@@ -72,13 +75,23 @@ public class Rocket extends Actor {
         sprite.setRotation((float)Math.toDegrees(body.getAngle()));
         TextureRegion currentRocketFrame = rocketAnimation.getKeyFrame(stateTime,true);
         if(drawSprite){
-            batch.draw(currentRocketFrame, sprite.getX(), sprite.getY(), sprite.getOriginX(), sprite.getOriginY(), sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(), sprite.getScaleY(), sprite.getRotation());
+            batch.draw(currentRocketFrame,
+                    sprite.getX(),
+                    sprite.getY(),
+                    sprite.getOriginX(),
+                    sprite.getOriginY(),
+                    sprite.getWidth(),
+                    sprite.getHeight(),
+                    sprite.getScaleX(),
+                    sprite.getScaleY(),
+                    sprite.getRotation());
         }
     }
     public void launch(Body body,Vector2 direction){
+        System.out.println(direction);
         drawSprite = true;
         body.setGravityScale(1);
-        body.setLinearVelocity(body.getLinearVelocity().add(direction));
+        body.applyLinearImpulse(direction, Vector2.Zero, true);
 
     }
 
