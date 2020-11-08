@@ -64,6 +64,7 @@ public class GameScreen implements Screen, InputProcessor {
     public static Game game;
     public static OrthographicCamera camera;
     public static Viewport viewport;
+    public boolean screenInit = false;
 
     public GameScreen(Game aGame) {
         //Variable initialisation
@@ -94,7 +95,10 @@ public class GameScreen implements Screen, InputProcessor {
         ground = new Ground(groundTexture, world);
         cannon = new Cannon(cannonSheet,ground);
         background = new Background(backgroundTexture, ground);
+        this.updateCam();
         userInterface= new UserInterface(boostIcon);
+
+        screenInit = true;
 
         userInterface.launchButton.addListener(new InputListener(){
             @Override
@@ -115,7 +119,8 @@ public class GameScreen implements Screen, InputProcessor {
         stage.addActor(ground);
         stage.addActor(rocket);
         stage.addActor(userInterface);
-        userInterface.moveButtons();
+        userInterface.addUI();
+        Stats.currentFuel=(float)Stats.fuel;
 
         //ADDING INPUTS
         InputMultiplexer mult = new InputMultiplexer();
@@ -140,27 +145,31 @@ public class GameScreen implements Screen, InputProcessor {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         //Camera
-        camera.position.set(rocket.body.getPosition().x, Gdx.graphics.getHeight()/2,0);
-        camera.update();
+        updateCam();
 
         //World physics interpolation
-        world.step(1/60f, 6, 2);
+        world.step(delta, 6, 2);
 
         //debug
         batch.setProjectionMatrix(camera.combined);
         debugMatrix = batch.getProjectionMatrix().cpy().scale(1, 1, 0);
 
+
         //Rocket boosting
         if(rocketLaunched) {
+            //Cannon animation
+            if(!cannon.cannonAnimation.isAnimationFinished(cannon.stateTime)){
+                cannon.stateTime += Gdx.graphics.getDeltaTime();
+            }
             if (userInterface.boostButton.isPressed()) {
                 boost();
             } else {
-                rocket.stateTime = 0;
+                rocket.stateTime=0;
             }
         }
         buttonInput();
         userInterface.moveButtons();
-        stage.act(1/60f);
+        stage.act(delta);
         stage.draw();
         if(drawDebug){
             debugRenderer.render(world, debugMatrix);
@@ -170,37 +179,37 @@ public class GameScreen implements Screen, InputProcessor {
 
     public void launch(){
         if(!rocketLaunched){
-            cannon.stateTime+=Gdx.graphics.getDeltaTime();
-            Vector2 launchVec = new Vector2(1000000,1000000).scl((float) Stats.cannonStrength);
+            Vector2 launchVec = new Vector2(1000000000,1000000000).scl((float) Stats.cannonStrength);
             launchVec.scl((float)(1/Stats.weight));
             rocket.launch(rocket.body, launchVec);
             rocketLaunched=true;
-            System.out.println(Stats.cannonStrength);
+            userInterface.removeLaunchButton();
         }
     }
     public void boost(){
         if(Stats.currentFuel>0) {
-            rocket.stateTime += Gdx.graphics.getDeltaTime();
+            rocket.stateTime+=Gdx.graphics.getDeltaTime();
             float addedVel = 20000*(float)Stats.power;
             Vector2 pos = rocket.body.getPosition();
             Vector2 localDirectionVector = rocket.body.getLocalPoint(new Vector2(pos.x + rocket.sprite.getWidth() / 2, pos.y - rocket.sprite.getHeight() / 2));
             float angle = -1 * (float) Math.toRadians(localDirectionVector.angle());
             rocket.body.setLinearVelocity(rocket.body.getLinearVelocity().add(new Vector2(addedVel*(float)Math.cos(angle),addedVel* (float) Math.sin(angle))));
         }
-        float consumption = (float)((Stats.fuel/100)/Stats.efficiency);
+        float consumption = (float)((Stats.fuel/60)/Stats.efficiency);
         Stats.currentFuel = (Stats.currentFuel-consumption);
-        System.out.println(Stats.currentFuel);
+        userInterface.updateFuelGauge();
     }
     public void buttonInput(){
-        if(Gdx.input.isTouched()){
-            drawDebug=true;
-        }
         if(userInterface.right.isPressed()){
             rocket.body.setAngularVelocity(-1f);
         }
         if(userInterface.left.isPressed()){
             rocket.body.setAngularVelocity(1f);
         }
+    }
+    public void updateCam(){
+        camera.position.set(rocket.body.getPosition().x, Gdx.graphics.getHeight()/2,0);
+        camera.update();
     }
 
 
@@ -263,8 +272,7 @@ public class GameScreen implements Screen, InputProcessor {
 
     @Override
     public boolean scrolled(int amount) {
-        camera.zoom+=amount*0.5;
-        return true;
+        return false;
     }
 
     public class CollisionListener implements ContactListener {
@@ -273,12 +281,16 @@ public class GameScreen implements Screen, InputProcessor {
             Body bodyA = contact.getFixtureA().getBody();
             Body bodyB = contact.getFixtureB().getBody();
             TextButton next = new TextButton("Continue", MyGdxGame.gameSkin);
+            Label failLabel = new Label("CRASH!", MyGdxGame.gameSkin);
+            failLabel.setFontScale(2f);
+
             ground.body.setLinearVelocity(Vector2.Zero);
             next.addListener(new InputListener(){
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     game.setScreen(new UpgradeScreen(game));
                     rocketLaunched=false;
+                    screenInit=false;
                     return true;
                 }
 
@@ -291,14 +303,13 @@ public class GameScreen implements Screen, InputProcessor {
             if (bodyA.getType() == BodyDef.BodyType.KinematicBody || bodyB.getType() == BodyDef.BodyType.KinematicBody){
                 if(!changedScreen){
                     changedScreen=true;
-                    Label failLabel = new Label("CRASH!", MyGdxGame.gameSkin);
-                    failLabel.setFontScale(2f);
                     failLabel.setPosition(rocket.body.getPosition().x,rocket.body.getPosition().y+failLabel.getHeight()+next.getHeight()+50);
                     next.setPosition(failLabel.getX()-(next.getWidth()-failLabel.getWidth())/4, failLabel.getY()-next.getHeight()-10);
                     rocket.body.setType(BodyDef.BodyType.StaticBody);
                     stage.addActor(next);
                     stage.addActor(failLabel);
                     MyGdxGame.setCurrency(MyGdxGame.getCurrency()+1);
+                    userInterface.removeControls();
                 }
 
 
